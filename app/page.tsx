@@ -1,57 +1,30 @@
 "use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import Navigation from '@/components/landing/navigation';
-import HeroSection from '@/components/landing/hero-section';
+import React, { Suspense } from 'react';
 import { AuthProvider } from '@/providers/auth-provider';
-import { toast } from 'sonner';
 
-// Dynamic imports for below-the-fold sections with better error handling
-const ValidatorSection = dynamic(() => import('@/components/landing/validator-section'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />,
-  ssr: false
-});
-const ExamDetailsSection = dynamic(() => import('@/components/landing/exam-details-section'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />,
-  ssr: false
-});
-const FeaturesSection = dynamic(() => import('@/components/landing/features-section'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />,
-  ssr: false
-});
-const PricingSection = dynamic(() => import('@/components/landing/pricing-section'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />,
-  ssr: false
-});
-const CostSavingsSection = dynamic(() => import('@/components/landing/cost-savings-section'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />,
-  ssr: false
-});
-const DentoriumSection = dynamic(() => import('@/components/landing/dentorium-section'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />,
-  ssr: false
-});
-const TestimonialsSection = dynamic(() => import('@/components/landing/testimonials-section'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />,
-  ssr: false
-});
-const FAQSection = dynamic(() => import('@/components/landing/faq-section'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />,
-  ssr: false
-});
-const FinalCTASection = dynamic(() => import('@/components/landing/final-cta-section'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />,
-  ssr: false
-});
-const Footer = dynamic(() => import('@/components/landing/footer'), {
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />,
-  ssr: false
-});
+// Lazy load all components to reduce initial bundle
+const Navigation = React.lazy(() => import('@/components/landing/navigation'));
+const HeroSection = React.lazy(() => import('@/components/landing/hero-section'));
+
+// Lazy load all sections to minimize initial bundle
+const ValidatorSection = React.lazy(() => import('@/components/landing/validator-section'));
+const ExamDetailsSection = React.lazy(() => import('@/components/landing/exam-details-section'));
+const FeaturesSection = React.lazy(() => import('@/components/landing/features-section'));
+const PricingSection = React.lazy(() => import('@/components/landing/pricing-section'));
+const CostSavingsSection = React.lazy(() => import('@/components/landing/cost-savings-section'));
+const DentoriumSection = React.lazy(() => import('@/components/landing/dentorium-section'));
+const TestimonialsSection = React.lazy(() => import('@/components/landing/testimonials-section'));
+const FAQSection = React.lazy(() => import('@/components/landing/faq-section'));
+const FinalCTASection = React.lazy(() => import('@/components/landing/final-cta-section'));
+const Footer = React.lazy(() => import('@/components/landing/footer'));
+
+// Minimal loading component
+const LoadingSection = () => (
+  <div className="h-32 bg-gray-100 animate-pulse rounded" />
+);
 
 function HomePage() {
-  const router = useRouter();
 
   const handleRegisterClick = () => {
     // Use window.location for more reliable navigation
@@ -92,49 +65,64 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <Navigation
-        onRegisterClick={handleRegisterClick}
-        onLoginClick={handleLoginClick}
-      />
+      <Suspense fallback={<div className="h-16 bg-white shadow-sm" />}>
+        <Navigation
+          onRegisterClick={handleRegisterClick}
+          onLoginClick={handleLoginClick}
+        />
+      </Suspense>
 
       {/* Hero Section */}
-      <HeroSection
-        onRegisterClick={handleRegisterClick}
-        onViewPackagesClick={handleViewPackagesClick}
-      />
+      <Suspense fallback={<div className="h-96 bg-gradient-to-r from-blue-600 to-blue-700" />}>
+        <HeroSection
+          onRegisterClick={handleRegisterClick}
+          onViewPackagesClick={handleViewPackagesClick}
+        />
+      </Suspense>
 
-      {/* Validator Section */}
-      <ValidatorSection />
+      {/* Below-the-fold sections */}
+      <Suspense fallback={<LoadingSection />}>
+        <ValidatorSection />
+      </Suspense>
 
-      {/* Exam Details Section */}
-      <ExamDetailsSection />
+      <Suspense fallback={<LoadingSection />}>
+        <ExamDetailsSection />
+      </Suspense>
 
-      {/* Features Section */}
-      <FeaturesSection />
+      <Suspense fallback={<LoadingSection />}>
+        <FeaturesSection />
+      </Suspense>
 
-      {/* Pricing Section */}
-      <PricingSection onSelectPackage={handleSelectPackage} />
+      <Suspense fallback={<LoadingSection />}>
+        <PricingSection onSelectPackage={handleSelectPackage} />
+      </Suspense>
 
-      {/* Cost Savings Section */}
-      <CostSavingsSection />
+      <Suspense fallback={<LoadingSection />}>
+        <CostSavingsSection />
+      </Suspense>
 
-      {/* Dentorium Section */}
-      <DentoriumSection />
+      <Suspense fallback={<LoadingSection />}>
+        <DentoriumSection />
+      </Suspense>
 
-      {/* Testimonials Section */}
-      <TestimonialsSection />
+      <Suspense fallback={<LoadingSection />}>
+        <TestimonialsSection />
+      </Suspense>
 
-      {/* FAQ Section */}
-      <FAQSection />
+      <Suspense fallback={<LoadingSection />}>
+        <FAQSection />
+      </Suspense>
 
-      {/* Final CTA Section */}
-      <FinalCTASection
-        onRegisterFreeClick={handleRegisterFreeClick}
-        onUpgradeClick={handleUpgradeClick}
-      />
+      <Suspense fallback={<LoadingSection />}>
+        <FinalCTASection
+          onRegisterFreeClick={handleRegisterFreeClick}
+          onUpgradeClick={handleUpgradeClick}
+        />
+      </Suspense>
 
-      {/* Footer */}
-      <Footer />
+      <Suspense fallback={<LoadingSection />}>
+        <Footer />
+      </Suspense>
     </div>
   );
 }
