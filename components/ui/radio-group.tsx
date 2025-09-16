@@ -2,7 +2,12 @@
 
 import * as React from "react"
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group"
-import { Circle } from "lucide-react"
+// Inline SVG icon to reduce bundle size
+const CircleIcon = () => (
+  <svg className="h-2.5 w-2.5 fill-current text-current" fill="currentColor" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" />
+  </svg>
+);
 
 import { cn } from "@/lib/utils"
 
@@ -34,7 +39,7 @@ const RadioGroupItem = React.forwardRef<
       {...props}
     >
       <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <Circle className="h-2.5 w-2.5 fill-current text-current" />
+        <CircleIcon />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   )

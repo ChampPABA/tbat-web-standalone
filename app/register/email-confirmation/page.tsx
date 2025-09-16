@@ -2,7 +2,12 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle } from "lucide-react";
+// Inline SVG icon to reduce bundle size
+const CheckCircleIcon = () => (
+  <svg className="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -72,7 +77,7 @@ function EmailConfirmationContent() {
           {/* Success Icon */}
           <div className="text-center py-8 sm:py-12 animate-fade-in">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-soft">
-              <CheckCircle className="w-10 h-10 text-green-600" />
+              <CheckCircleIcon />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
               {registrationData?.packageType === 'ADVANCED' ? 'ชำระเงินสำเร็จ!' : 'ลงทะเบียนสำเร็จ!'}
