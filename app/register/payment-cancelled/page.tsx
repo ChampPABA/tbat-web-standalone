@@ -1,7 +1,22 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CreditCard, HelpCircle } from "lucide-react";
+// Inline SVG icons to reduce bundle size
+const ArrowLeftIcon = () => (
+  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+  </svg>
+);
+const CreditCardIcon = () => (
+  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+  </svg>
+);
+const HelpCircleIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
 import Link from "next/link";
 
 export default function PaymentCancelledPage() {
@@ -56,13 +71,13 @@ export default function PaymentCancelledPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <Button asChild className="flex-1">
               <Link href="/register">
-                <CreditCard className="w-4 h-4 mr-2" />
+                <CreditCardIcon />
                 ลองชำระเงินอีกครั้ง
               </Link>
             </Button>
             <Button variant="outline" asChild className="flex-1">
               <Link href="/">
-                <ArrowLeft className="w-4 h-4 mr-2" />
+                <ArrowLeftIcon />
                 กลับหน้าหลัก
               </Link>
             </Button>
@@ -71,7 +86,7 @@ export default function PaymentCancelledPage() {
           {/* Support Information */}
           <div className="border-t pt-6">
             <div className="flex items-center justify-center gap-2 text-tbat-primary mb-2">
-              <HelpCircle className="w-5 h-5" />
+              <HelpCircleIcon />
               <span className="font-semibold">ต้องการความช่วยเหลือ?</span>
             </div>
             <p className="text-sm text-gray-600 mb-4">
