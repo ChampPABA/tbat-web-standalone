@@ -1,10 +1,9 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "prisma generate && npm run build",
-  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "pnpm prisma generate && pnpm run build",
+  "installCommand": "pnpm install --frozen-lockfile",
   "functions": {
     "app/**/*.{ts,tsx}": {
-      "maxDuration": 10
+      "maxDuration": 30
     }
   }
 }
