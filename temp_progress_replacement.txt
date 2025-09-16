@@ -1,0 +1,43 @@
+            {/* Connector 4 */}
+            <div className={`flex-1 h-1 mx-1 sm:mx-2 ${
+              currentStep >= 5 ? 'bg-tbat-primary' : 'bg-gray-300'
+            }`}>
+            </div>
+
+            {/* Step 5 - QR Code Line */}
+            <div className="flex items-center animate-fade-in" style={{animationDelay: '0.4s'}}>
+              <div className={`w-8 sm:w-10 h-8 sm:h-10 rounded-full flex items-center justify-center font-semibold transform transition-transform ${
+                currentStep >= 5 ? 'bg-tbat-primary text-white' : 'bg-gray-300 text-gray-500'
+              } ${currentStep === 5 ? 'scale-110' : ''}`}>
+                <span>5</span>
+              </div>
+              <span className={`ml-2 text-xs sm:text-sm font-medium hidden lg:block ${
+                currentStep >= 5 ? 'text-tbat-primary' : 'text-gray-500'
+              }`}>
+                เข้าร่วม Line
+              </span>
+            </div>
+
+            {/* Connector 5 (Only for Advanced) */}
+            {formData.packageType === 'ADVANCED' && (
+              <>
+                <div className={`flex-1 h-1 mx-1 sm:mx-2 ${
+                  currentStep >= 6 ? 'bg-tbat-primary' : 'bg-gray-300'
+                }`}>
+                </div>
+
+                {/* Step 6 - Payment for Advanced */}
+                <div className="flex items-center animate-fade-in" style={{animationDelay: '0.5s'}}>
+                  <div className={`w-8 sm:w-10 h-8 sm:h-10 rounded-full flex items-center justify-center font-semibold transform transition-transform ${
+                    currentStep >= 6 ? 'bg-tbat-primary text-white' : 'bg-gray-300 text-gray-500'
+                  } ${currentStep === 6 ? 'scale-110' : ''}`}>
+                    <span>6</span>
+                  </div>
+                  <span className={`ml-2 text-xs sm:text-sm font-medium hidden lg:block ${
+                    currentStep >= 6 ? 'text-tbat-primary' : 'text-gray-500'
+                  }`}>
+                    ชำระเงิน
+                  </span>
+                </div>
+              </>
+            )}

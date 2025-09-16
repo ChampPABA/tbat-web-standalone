@@ -1,0 +1,474 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String          @id @default(uuid())
+  email               String          @unique
+  passwordHash        String?         @map("password_hash")
+  thaiName            String          @map("thai_name")
+  nickname            String?
+  phone               String?
+  school              String?
+  grade               String?
+  lineId              String?         @map("line_id")
+  parentName          String?         @map("parent_name")
+  parentPhone         String?         @map("parent_phone")
+  nationalId          String?         @unique @map("national_id") @db.VarChar(13)
+  packageType         PackageType     @default(FREE) @map("package_type")
+  isUpgraded          Boolean         @default(false) @map("is_upgraded")
+  pdpaConsent         Boolean         @default(false) @map("pdpa_consent")
+  failedLoginAttempts Int             @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime?       @map("locked_until")
+  passwordChangedAt   DateTime?       @map("password_changed_at")
+  lastLoginAt         DateTime?       @map("last_login_at")
+  isActive            Boolean         @default(true) @map("is_active")
+  deletedAt           DateTime?       @map("deleted_at")
+  metadata            Json?
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+  accounts            Account[]
+  analytics           Analytics[]
+  examCodes           ExamCode[]
+  examResults         ExamResult[]
+  passwordResets      PasswordReset[]
+  payments            Payment[]
+  pdfDownloads        PDFDownload[]
+  pdpaConsents        PDPAConsent[]
+  supportTickets      SupportTicket[]
+  userPackages        UserPackage[]
+  sessions            UserSession[]
+
+  @@index([thaiName])
+  @@index([school])
+  @@map("users")
+}
+
+model UserSession {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  sessionToken String   @unique @map("session_token")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_sessions")
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Package {
+  id          String      @id @default(uuid())
+  type        PackageType @unique
+  price       Int
+  currency    String      @default("thb")
+  features    String[]
+  description String
+  isActive    Boolean     @default(true) @map("is_active")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("packages")
+}
+
+model ExamCode {
+  id          String       @id @default(uuid())
+  userId      String       @map("user_id")
+  code        String       @unique
+  packageType PackageType  @map("package_type")
+  subject     Subject
+  sessionTime SessionTime  @map("session_time")
+  isUsed      Boolean      @default(false) @map("is_used")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  usedAt      DateTime?    @map("used_at")
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  examResults ExamResult[]
+
+  @@index([userId])
+  @@index([code])
+  @@index([packageType, sessionTime])
+  @@index([userId, packageType])
+  @@index([sessionTime, createdAt])
+  @@map("exam_codes")
+}
+
+model SessionCapacity {
+  id           String      @id @default(uuid())
+  sessionTime  SessionTime @map("session_time")
+  currentCount Int         @default(0) @map("current_count")
+  maxCapacity  Int         @default(300) @map("max_capacity")
+  examDate     DateTime    @map("exam_date")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  @@unique([sessionTime, examDate])
+  @@index([sessionTime])
+  @@index([examDate])
+  @@index([currentCount])
+  @@map("session_capacities")
+}
+
+model UserPackage {
+  id           String      @id @default(uuid())
+  userId       String      @map("user_id")
+  packageType  PackageType @map("package_type")
+  sessionTime  SessionTime @map("session_time")
+  registeredAt DateTime    @default(now()) @map("registered_at")
+  isActive     Boolean     @default(true) @map("is_active")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, packageType, sessionTime])
+  @@index([userId])
+  @@index([packageType])
+  @@index([sessionTime])
+  @@index([packageType, sessionTime])
+  @@index([sessionTime, registeredAt])
+  @@map("user_packages")
+}
+
+model CapacityStatus {
+  id                 String             @id @default(uuid())
+  sessionTime        SessionTime        @map("session_time")
+  examDate           DateTime           @map("exam_date")
+  totalCount         Int                @default(0) @map("total_count")
+  freeCount          Int                @default(0) @map("free_count")
+  advancedCount      Int                @default(0) @map("advanced_count")
+  maxCapacity        Int                @default(300) @map("max_capacity")
+  freeLimit          Int                @default(150) @map("free_limit")
+  availabilityStatus AvailabilityStatus @default(AVAILABLE) @map("availability_status")
+  lastUpdated        DateTime           @default(now()) @map("last_updated")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  @@unique([sessionTime, examDate])
+  @@index([sessionTime])
+  @@index([availabilityStatus])
+  @@map("capacity_status")
+}
+
+model Payment {
+  id                    String        @id @default(uuid())
+  userId                String        @map("user_id")
+  stripePaymentIntentId String        @unique @map("stripe_payment_intent_id")
+  amount                Int
+  currency              String        @default("thb")
+  paymentType           PaymentType   @map("payment_type")
+  status                PaymentStatus @default(PENDING)
+  completedAt           DateTime?     @map("completed_at")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([stripePaymentIntentId])
+  @@map("payments")
+}
+
+model ExamResult {
+  id             String     @id @default(uuid())
+  userId         String     @map("user_id")
+  examCodeId     String     @map("exam_code_id")
+  subject        Subject?
+  score          Float?
+  totalQuestions Int?       @map("total_questions")
+  totalScore     Float      @map("total_score")
+  biologyScore   Float?     @map("biology_score")
+  chemistryScore Float?     @map("chemistry_score")
+  physicsScore   Float?     @map("physics_score")
+  percentile     Float?
+  completionTime Int        @map("completion_time")
+  expiresAt      DateTime   @default(dbgenerated("(now() + '6 mons'::interval)")) @map("expires_at")
+  isAccessible   Boolean    @default(true) @map("is_accessible")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  analytics      Analytics?
+  examCode       ExamCode   @relation(fields: [examCodeId], references: [id])
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([examCodeId])
+  @@index([expiresAt])
+  @@map("exam_results")
+}
+
+model Analytics {
+  id                String     @id @default(uuid())
+  resultId          String     @unique @map("result_id")
+  userId            String     @map("user_id")
+  subjectBreakdowns Json       @map("subject_breakdowns")
+  recommendations   Json
+  comparisonData    Json       @map("comparison_data")
+  generatedAt       DateTime   @default(now()) @map("generated_at")
+  result            ExamResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("analytics")
+}
+
+model PDFSolution {
+  id            String            @id @default(uuid())
+  subject       Subject
+  examDate      DateTime          @map("exam_date")
+  fileUrl       String            @map("file_url")
+  fileSize      Int               @map("file_size")
+  description   String
+  uploadAdminId String            @map("upload_admin_id")
+  isActive      Boolean           @default(true) @map("is_active")
+  expiresAt     DateTime          @map("expires_at")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  downloads     PDFDownload[]
+  notifications PDFNotification[]
+  uploadAdmin   AdminUser         @relation(fields: [uploadAdminId], references: [id])
+
+  @@index([subject])
+  @@map("pdf_solutions")
+}
+
+model PDFDownload {
+  id            String      @id @default(uuid())
+  pdfId         String      @map("pdf_id")
+  userId        String      @map("user_id")
+  downloadToken String      @unique @map("download_token")
+  downloadedAt  DateTime    @default(now()) @map("downloaded_at")
+  expiresAt     DateTime    @map("expires_at")
+  pdf           PDFSolution @relation(fields: [pdfId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([pdfId])
+  @@map("pdf_downloads")
+}
+
+model PDFNotification {
+  id            String      @id @default(uuid())
+  pdfId         String      @map("pdf_id")
+  sentToUserIds String[]    @map("sent_to_user_ids")
+  emailCount    Int         @map("email_count")
+  failedCount   Int         @map("failed_count")
+  sentAt        DateTime    @default(now()) @map("sent_at")
+  pdf           PDFSolution @relation(fields: [pdfId], references: [id], onDelete: Cascade)
+
+  @@index([pdfId])
+  @@map("pdf_notifications")
+}
+
+model AdminUser {
+  id             String          @id @default(uuid())
+  email          String          @unique
+  passwordHash   String          @map("password_hash")
+  thaiName       String          @map("thai_name")
+  role           AdminRole
+  permissions    String[]
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  auditLogs      AuditLog[]
+  uploadedPDFs   PDFSolution[]
+  supportTickets SupportTicket[]
+
+  @@map("admin_users")
+}
+
+model AuditLog {
+  id           String     @id @default(uuid())
+  adminId      String     @map("admin_id")
+  actionType   ActionType @map("action_type")
+  targetId     String     @map("target_id")
+  originalData Json       @map("original_data")
+  newData      Json       @map("new_data")
+  reason       String
+  createdAt    DateTime   @default(now()) @map("created_at")
+  admin        AdminUser  @relation(fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([targetId])
+  @@map("audit_logs")
+}
+
+model SecurityLog {
+  id           String            @id @default(uuid())
+  eventType    SecurityEventType @map("event_type")
+  action       String?
+  userId       String?           @map("user_id")
+  resourceId   String?           @map("resource_id")
+  resourceType String?           @map("resource_type")
+  metadata     Json?
+  details      Json?
+  ipAddress    String?           @map("ip_address")
+  userAgent    String?           @map("user_agent")
+  timestamp    DateTime          @default(now())
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([timestamp])
+  @@map("security_logs")
+}
+
+model SupportTicket {
+  id          String       @id @default(uuid())
+  userId      String       @map("user_id")
+  adminId     String       @map("admin_id")
+  issueType   IssueType    @map("issue_type")
+  description String
+  resolution  String?
+  status      TicketStatus @default(OPEN)
+  priority    Priority     @default(MEDIUM)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  resolvedAt  DateTime?    @map("resolved_at")
+  admin       AdminUser    @relation(fields: [adminId], references: [id])
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([adminId])
+  @@index([status])
+  @@map("support_tickets")
+}
+
+model PasswordReset {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  resetToken String   @unique @map("reset_token")
+  expiresAt  DateTime @map("expires_at")
+  isUsed     Boolean  @default(false) @map("is_used")
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([resetToken])
+  @@index([expiresAt])
+  @@map("password_resets")
+}
+
+model PDPAConsent {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  consentType String    @map("consent_type")
+  status      String
+  grantedAt   DateTime? @map("granted_at")
+  revokedAt   DateTime? @map("revoked_at")
+  ipAddress   String?   @map("ip_address")
+  userAgent   String?   @map("user_agent")
+  metadata    Json?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("pdpa_consents")
+}
+
+enum PackageType {
+  FREE
+  ADVANCED
+}
+
+enum Subject {
+  BIOLOGY
+  CHEMISTRY
+  PHYSICS
+}
+
+enum SessionTime {
+  MORNING   @map("09:00-12:00")
+  AFTERNOON @map("13:00-16:00")
+}
+
+enum PaymentType {
+  ADVANCED_PACKAGE
+  POST_EXAM_UPGRADE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum AdminRole {
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ActionType {
+  USER_UPDATE
+  CODE_REGEN
+  PDF_UPLOAD
+  CRISIS_RESOLUTION
+}
+
+enum IssueType {
+  CODE_PROBLEM
+  PAYMENT_ISSUE
+  RESULT_ERROR
+  PDF_ACCESS
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  ESCALATED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SecurityEventType {
+  LOGIN_ATTEMPT
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  PASSWORD_CHANGE
+  ACCOUNT_LOCKED
+  PDPA_CONSENT_GRANTED
+  PDPA_CONSENT_REVOKED
+  UNAUTHORIZED_ACCESS
+  RATE_LIMIT_EXCEEDED
+  SUSPICIOUS_ACTIVITY
+  AUTHENTICATION_SUCCESS
+  AUTHENTICATION_FAILED
+  PASSWORD_RESET_REQUEST
+  MULTIPLE_LOGIN_ATTEMPTS
+  PDF_UNAUTHORIZED_ACCESS
+  ADMIN_DATA_ACCESS
+  DATA_EXPORT
+  DATA_DELETION
+  NATIONAL_ID_VALIDATION_SUCCESS
+  NATIONAL_ID_VALIDATION_FAILED
+  NATIONAL_ID_DUPLICATE_ATTEMPT
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  LIMITED
+  FULL
+  CLOSED
+}
