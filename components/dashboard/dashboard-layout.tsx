@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import SiteNavigation from '@/components/shared/site-navigation';
+import Link from 'next/link';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -71,10 +71,33 @@ export default function DashboardLayout({ children, userName, onPrint }: Dashboa
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <SiteNavigation
-        showPrintButton={true}
-        onPrint={handlePrint}
-      />
+      {/* Lightweight Navigation */}
+      <nav className="bg-white shadow-sm sticky top-0 z-50 print:hidden">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <Link href="/" className="flex items-center">
+              <span className="text-3xl font-bold text-blue-600">TBAT</span>
+              <span className="text-2xl font-light text-gray-600 ml-2">Mock Exam</span>
+            </Link>
+
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">สวัสดี, {userName}</span>
+              <button
+                onClick={handlePrint}
+                className="px-3 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm"
+              >
+                พิมพ์ข้อมูล
+              </button>
+              <Link
+                href="/"
+                className="px-3 py-2 text-gray-600 hover:text-gray-800 text-sm"
+              >
+                กลับหน้าหลัก
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
 
       {/* Page Header */}
       <div className="bg-white border-b print:hidden">
