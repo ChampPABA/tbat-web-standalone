@@ -5,7 +5,22 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CopyIcon as Copy, CheckIcon as Check, QrCodeIcon as QrCode } from "@/components/icons/dynamic-icons";
+// Inline SVG icons to reduce bundle size
+const CopyIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+  </svg>
+);
+const CheckIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+  </svg>
+);
+const QrCodeIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V4a1 1 0 00-1-1H5a1 1 0 00-1 1v3a1 1 0 001 1zm0 10h2a1 1 0 001-1v-3a1 1 0 00-1-1H5a1 1 0 00-1 1v3a1 1 0 001 1zM17 5h2a1 1 0 001-1V1a1 1 0 00-1-1h-2a1 1 0 00-1 1v3a1 1 0 001 1z" />
+  </svg>
+);
 import QRCodeLib from "qrcode";
 
 export interface ExamCodeDisplayProps {
@@ -177,7 +192,7 @@ export function ExamCodeDisplay({
                   onClick={handleCopy}
                   className="flex items-center gap-2"
                 >
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? <CheckIcon /> : <CopyIcon />}
                   {copied ? "คัดลอกแล้ว" : "คัดลอกรหัส"}
                 </Button>
                 <Button
@@ -186,7 +201,7 @@ export function ExamCodeDisplay({
                   onClick={generateQRCode}
                   className="flex items-center gap-2"
                 >
-                  <QrCode className="w-4 h-4" />
+                  <QrCodeIcon />
                   QR Code
                 </Button>
               </div>
