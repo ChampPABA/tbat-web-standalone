@@ -1,11 +1,5 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "prisma generate && npm run build",
-  "installCommand": "npm install --legacy-peer-deps",
-  "functions": {
-    "app/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  }
+  "installCommand": "npm install --legacy-peer-deps"
 }
