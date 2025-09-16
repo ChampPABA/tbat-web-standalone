@@ -41,20 +41,25 @@ export const POST = withRateLimit(
 
       // Check database availability
       if (!prisma) {
-        return NextResponse.json({ error: "Database not available" }, { status: 503 });
+        return NextResponse.json(
+          { error: "Database not available" },
+          { status: 503 }
+        );
       }
 
       // Debug logging
       console.log("🔍 Debug reset password:", {
         tokenReceived: token,
         tokenLength: token.length,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       // Find valid reset token
       const passwordReset = await prisma.passwordReset.findUnique({
         where: { resetToken: token },
-        include: { user: { select: { id: true, email: true, thaiName: true } } }
+        include: {
+          user: { select: { id: true, email: true, thaiName: true } },
+        },
       });
 
       console.log("🔍 Token lookup result:", {
@@ -62,7 +67,7 @@ export const POST = withRateLimit(
         tokenInDb: passwordReset?.resetToken,
         expiresAt: passwordReset?.expiresAt,
         isUsed: passwordReset?.isUsed,
-        currentTime: new Date().toISOString()
+        currentTime: new Date().toISOString(),
       });
 
       // Validate token
@@ -117,7 +122,10 @@ export const POST = withRateLimit(
           data: {
             eventType: "PASSWORD_CHANGE",
             userId: passwordReset.userId,
-            ipAddress: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown",
+            ipAddress:
+              req.headers.get("x-forwarded-for") ||
+              req.headers.get("x-real-ip") ||
+              "unknown",
             userAgent: req.headers.get("user-agent") || "unknown",
             metadata: {
               resetTokenUsed: true,
@@ -132,7 +140,8 @@ export const POST = withRateLimit(
       return NextResponse.json(
         {
           success: true,
-          message: "รหัสผ่านของคุณได้รับการอัปเดตเรียบร้อยแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่",
+          message:
+            "รหัสผ่านของคุณได้รับการอัปเดตเรียบร้อยแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่",
         },
         { status: 200 }
       );
@@ -144,7 +153,10 @@ export const POST = withRateLimit(
         await prisma?.securityLog.create({
           data: {
             eventType: "AUTHENTICATION_FAILED",
-            ipAddress: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown",
+            ipAddress:
+              req.headers.get("x-forwarded-for") ||
+              req.headers.get("x-real-ip") ||
+              "unknown",
             userAgent: req.headers.get("user-agent") || "unknown",
             metadata: {
               action: "PASSWORD_RESET_FAILED",

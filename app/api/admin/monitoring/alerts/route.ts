@@ -25,26 +25,32 @@ export async function GET(request: NextRequest) {
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     // Check admin status
     if (!prisma) {
-      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+      return NextResponse.json(
+        { error: "Database not available" },
+        { status: 503 }
+      );
     }
-    
+
     const admin = await prisma.adminUser.findUnique({
       where: { email: session.user.email },
     });
-    
+
     if (!admin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
     }
-    
+
     // Get all configured alerts
     const configuredAlerts = Array.from(alerts.values());
-    
+
     // Check current alert status
     const alertStatus = await checkAlertConditions(configuredAlerts);
-    
+
     return NextResponse.json({
       alerts: configuredAlerts,
       status: alertStatus,
@@ -66,22 +72,28 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     // Check admin status
     if (!prisma) {
-      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+      return NextResponse.json(
+        { error: "Database not available" },
+        { status: 503 }
+      );
     }
-    
+
     const admin = await prisma.adminUser.findUnique({
       where: { email: session.user.email },
     });
-    
+
     if (!admin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
     }
-    
+
     const alertData = await request.json();
-    
+
     // Create new alert
     const alert: Alert = {
       id: Math.random().toString(36).substr(2, 9),
@@ -93,9 +105,9 @@ export async function POST(request: NextRequest) {
       recipients: alertData.recipients,
       enabled: alertData.enabled ?? true,
     };
-    
+
     alerts.set(alert.id, alert);
-    
+
     // Log alert creation
     await logSecurityEvent(
       "ADMIN_DATA_ACCESS",
@@ -107,7 +119,7 @@ export async function POST(request: NextRequest) {
       },
       request.headers.get("x-forwarded-for") || undefined
     );
-    
+
     return NextResponse.json({
       success: true,
       alert,
@@ -128,31 +140,37 @@ export async function PUT(request: NextRequest) {
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     // Check admin status
     if (!prisma) {
-      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+      return NextResponse.json(
+        { error: "Database not available" },
+        { status: 503 }
+      );
     }
-    
+
     const admin = await prisma.adminUser.findUnique({
       where: { email: session.user.email },
     });
-    
+
     if (!admin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
     }
-    
+
     const { id, ...updates } = await request.json();
-    
+
     const alert = alerts.get(id);
     if (!alert) {
       return NextResponse.json({ error: "Alert not found" }, { status: 404 });
     }
-    
+
     // Update alert
     const updatedAlert = { ...alert, ...updates };
     alerts.set(id, updatedAlert);
-    
+
     return NextResponse.json({
       success: true,
       alert: updatedAlert,
@@ -173,33 +191,39 @@ export async function DELETE(request: NextRequest) {
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     // Check admin status
     if (!prisma) {
-      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+      return NextResponse.json(
+        { error: "Database not available" },
+        { status: 503 }
+      );
     }
-    
+
     const admin = await prisma.adminUser.findUnique({
       where: { email: session.user.email },
     });
-    
+
     if (!admin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
     }
-    
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    
+
     if (!id) {
       return NextResponse.json({ error: "Alert ID required" }, { status: 400 });
     }
-    
+
     const deleted = alerts.delete(id);
-    
+
     if (!deleted) {
       return NextResponse.json({ error: "Alert not found" }, { status: 404 });
     }
-    
+
     return NextResponse.json({
       success: true,
       message: "Alert deleted successfully",
@@ -215,39 +239,39 @@ export async function DELETE(request: NextRequest) {
 
 async function checkAlertConditions(configuredAlerts: Alert[]) {
   const triggeredAlerts = [];
-  
+
   for (const alert of configuredAlerts) {
     if (!alert.enabled) continue;
-    
+
     let shouldTrigger = false;
     let currentValue = 0;
-    
+
     switch (alert.type) {
       case "performance":
         // Check API response times
         currentValue = await getAverageResponseTime();
         shouldTrigger = currentValue > alert.threshold;
         break;
-        
+
       case "error":
         // Check error rate
         currentValue = await getErrorRate();
         shouldTrigger = currentValue > alert.threshold;
         break;
-        
+
       case "capacity":
         // Check session capacity
         currentValue = await getCapacityUsage();
         shouldTrigger = currentValue > alert.threshold;
         break;
-        
+
       case "security":
         // Check security events
         currentValue = await getSecurityEventCount();
         shouldTrigger = currentValue > alert.threshold;
         break;
     }
-    
+
     if (shouldTrigger) {
       triggeredAlerts.push({
         alertId: alert.id,
@@ -256,12 +280,12 @@ async function checkAlertConditions(configuredAlerts: Alert[]) {
         threshold: alert.threshold,
         triggered: new Date().toISOString(),
       });
-      
+
       // Trigger alert action
       await triggerAlertAction(alert, currentValue);
     }
   }
-  
+
   return triggeredAlerts;
 }
 
@@ -272,7 +296,7 @@ async function getAverageResponseTime(): Promise<number> {
 
 async function getErrorRate(): Promise<number> {
   if (!prisma) return 0;
-  
+
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
   const errors = await prisma.securityLog.count({
     where: {
@@ -285,23 +309,26 @@ async function getErrorRate(): Promise<number> {
 
 async function getCapacityUsage(): Promise<number> {
   if (!prisma) return 0;
-  
+
   const sessions = await prisma.sessionCapacity.findMany({
     where: { examDate: { gte: new Date() } },
   });
-  
+
   if (sessions.length === 0) return 0;
-  
-  const totalUsage = sessions.reduce((sum, s) => {
-    return sum + (s.currentCount / s.maxCapacity) * 100;
-  }, 0);
-  
+
+  const totalUsage = sessions.reduce(
+    (sum: number, s: { currentCount: number; maxCapacity: number }) => {
+      return sum + (s.currentCount / s.maxCapacity) * 100;
+    },
+    0
+  );
+
   return totalUsage / sessions.length;
 }
 
 async function getSecurityEventCount(): Promise<number> {
   if (!prisma) return 0;
-  
+
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   return prisma.securityLog.count({
     where: {
@@ -318,12 +345,14 @@ async function getSecurityEventCount(): Promise<number> {
 }
 
 async function triggerAlertAction(alert: Alert, currentValue: number) {
-  console.log(`Alert triggered: ${alert.name} (${currentValue} > ${alert.threshold})`);
-  
+  console.log(
+    `Alert triggered: ${alert.name} (${currentValue} > ${alert.threshold})`
+  );
+
   // Update last triggered time
   alert.lastTriggered = new Date();
   alerts.set(alert.id, alert);
-  
+
   // In production, implement actual alert actions:
   // - Send emails via Resend
   // - Send SMS via Twilio

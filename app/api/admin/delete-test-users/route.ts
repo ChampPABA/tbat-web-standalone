@@ -16,7 +16,7 @@ export async function DELETE(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const emails = searchParams.get('emails')?.split(',') || [];
+    const emails = searchParams.get("emails")?.split(",") || [];
 
     if (emails.length === 0) {
       return NextResponse.json(
@@ -25,50 +25,52 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    console.log(`🗑️ Deleting test users: ${emails.join(', ')}`);
+    console.log(`🗑️ Deleting test users: ${emails.join(", ")}`);
 
     // First get user IDs
     const usersToDelete = await prisma.user.findMany({
       where: { email: { in: emails } },
-      select: { id: true, email: true }
+      select: { id: true, email: true },
     });
 
-    const userIds = usersToDelete.map(user => user.id);
+    const userIds = usersToDelete.map(
+      (user: { id: string; email: string }) => user.id
+    );
 
     if (userIds.length === 0) {
       return NextResponse.json({
         success: true,
         message: "No users found with those emails",
-        emails: emails
+        emails: emails,
       });
     }
 
     // Delete related records first (foreign key constraints)
     const deletedSessions = await prisma.userSession.deleteMany({
-      where: { userId: { in: userIds } }
+      where: { userId: { in: userIds } },
     });
 
     const deletedSecurityLogs = await prisma.securityLog.deleteMany({
-      where: { userId: { in: userIds } }
+      where: { userId: { in: userIds } },
     });
 
     const deletedPasswordResets = await prisma.passwordReset.deleteMany({
-      where: { userId: { in: userIds } }
+      where: { userId: { in: userIds } },
     });
 
     // Delete any exam codes
     const deletedExamCodes = await prisma.examCode.deleteMany({
-      where: { userId: { in: userIds } }
+      where: { userId: { in: userIds } },
     });
 
     // Delete any payments
     const deletedPayments = await prisma.payment.deleteMany({
-      where: { userId: { in: userIds } }
+      where: { userId: { in: userIds } },
     });
 
     // Delete users
     const deletedUsers = await prisma.user.deleteMany({
-      where: { id: { in: userIds } }
+      where: { id: { in: userIds } },
     });
 
     console.log(`✅ Deleted ${deletedUsers.count} users`);
@@ -86,11 +88,10 @@ export async function DELETE(req: NextRequest) {
         securityLogs: deletedSecurityLogs.count,
         passwordResets: deletedPasswordResets.count,
         examCodes: deletedExamCodes.count,
-        payments: deletedPayments.count
+        payments: deletedPayments.count,
       },
-      emails: emails
+      emails: emails,
     });
-
   } catch (error) {
     console.error("Error deleting test users:", error);
     return NextResponse.json(
