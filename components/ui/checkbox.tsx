@@ -2,7 +2,12 @@
 
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
-import { Check } from "lucide-react"
+// Inline SVG icon to reduce bundle size
+const CheckIcon = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+  </svg>
+);
 
 import { cn } from "@/lib/utils"
 
@@ -21,7 +26,7 @@ const Checkbox = React.forwardRef<
     <CheckboxPrimitive.Indicator
       className={cn("flex items-center justify-center text-current")}
     >
-      <Check className="h-4 w-4" />
+      <CheckIcon />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ))

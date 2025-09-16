@@ -20,15 +20,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Only optimize heavy icon imports
-const CheckCircle = dynamic(() => import("lucide-react").then(mod => ({ default: mod.CheckCircle })), { ssr: false });
-const ArrowRight = dynamic(() => import("lucide-react").then(mod => ({ default: mod.ArrowRight })), { ssr: false });
-const Eye = dynamic(() => import("lucide-react").then(mod => ({ default: mod.Eye })), { ssr: false });
-const EyeOff = dynamic(() => import("lucide-react").then(mod => ({ default: mod.EyeOff })), { ssr: false });
+// Inline SVG icons to reduce bundle size
+const CheckCircleIcon = () => (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+const ArrowRightIcon = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+  </svg>
+);
+const EyeIcon = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  </svg>
+);
+const EyeOffIcon = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+  </svg>
+);
 
-const Image = dynamic(() => import("next/image"), {
-  loading: () => <div className="w-48 h-48 bg-gray-200 animate-pulse rounded-lg" />
-});
+import Image from 'next/image';
 
 // Form data interface
 interface FormData {
@@ -676,7 +691,7 @@ export default function RegisterPage() {
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                         >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                         </button>
                       </div>
                       {errors.password && (
@@ -706,7 +721,7 @@ export default function RegisterPage() {
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                         >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                         </button>
                       </div>
                       {errors.confirmPassword && (
@@ -843,7 +858,7 @@ export default function RegisterPage() {
                     className="px-8 py-3 bg-tbat-primary text-white rounded-lg hover:bg-tbat-secondary transition-all flex items-center justify-center group"
                   >
                     ถัดไป
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRightIcon />
                   </Button>
                 </div>
               </form>
@@ -964,7 +979,7 @@ export default function RegisterPage() {
                         className="px-8 py-3 bg-tbat-primary text-white rounded-lg hover:bg-tbat-secondary transition-all flex items-center justify-center group"
                       >
                         ถัดไป
-                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRightIcon />
                       </button>
                     </div>
                   </form>
@@ -1132,7 +1147,7 @@ export default function RegisterPage() {
                         className="px-8 py-3 bg-tbat-primary text-white rounded-lg hover:bg-tbat-secondary transition-all flex items-center justify-center group"
                       >
                         ถัดไป
-                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRightIcon />
                       </Button>
                     </div>
                   </form>
@@ -1288,7 +1303,7 @@ export default function RegisterPage() {
                         ) : (
                           <>
                             {formData.packageType === 'ADVANCED' ? 'ไปชำระเงิน' : 'ถัดไป'}
-                            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                            <ArrowRightIcon />
                           </>
                         )}
                       </Button>
@@ -1432,7 +1447,7 @@ export default function RegisterPage() {
                   ) : (
                     <>
                       <span>ยืนยันการลงทะเบียน</span>
-                      <CheckCircle className="w-5 h-5 ml-2 group-hover:scale-110 transition-transform" />
+                      <CheckCircleIcon />
                     </>
                   )}
                 </Button>
@@ -1444,7 +1459,11 @@ export default function RegisterPage() {
           {currentStep === 4 && (
             <div className="text-center py-8 sm:py-12 animate-fade-in">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-soft">
-                <CheckCircle className="w-10 h-10 text-green-600" />
+                <div className="text-green-600">
+                  <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
                 ลงทะเบียนสำเร็จ!
