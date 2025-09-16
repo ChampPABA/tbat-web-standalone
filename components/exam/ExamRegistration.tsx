@@ -5,7 +5,13 @@ import { SessionAvailabilityDisplay } from "@/components/ui/CapacityStatus";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+// Inline SVG icon to reduce bundle size
+const Loader2Icon = () => (
+  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+    <path className="opacity-75" fill="currentColor" d="m100 50.5908C100 78.2051 77.6142 100.591 50 100.591 22.3858 100.591 0 78.2051 0 50.5908 0 22.9766 22.3858 0.59082 50 0.59082 77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094 72.5987 91.5094 90.9186 73.1895 90.9186 50.5908 90.9186 27.9921 72.5987 9.67226 50 9.67226 27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"></path>
+  </svg>
+);
 
 // Types based on Story 3.1 updated API responses
 interface SessionData {
@@ -174,7 +180,7 @@ export function ExamRegistration({ examDate, onRegistrationComplete }: ExamRegis
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin" />
+        <Loader2Icon />
         <span className="ml-2">กำลังโหลดข้อมูลเซสชัน...</span>
       </div>
     );
@@ -333,7 +339,7 @@ export function ExamRegistration({ examDate, onRegistrationComplete }: ExamRegis
                 size="lg"
                 className="px-8"
               >
-                {registering && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {registering && <Loader2Icon />}
                 {registering ? "กำลังดำเนินการ..." : "ยืนยันการสมัครสอบ"}
               </Button>
             </div>
